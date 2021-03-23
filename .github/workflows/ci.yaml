@@ -1,45 +1,56 @@
-test:
- name: runs all tests
- runs-on: ubuntu-latest
+name: Continuous Integration
 
- steps:
-   - name: Checkout code
-     uses: actions/checkout@v2
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-   - name: Install node
-     uses: actions/setup-node@v2
-     with:
-       node-version: '15'
+jobs:
+  test:
+  name: runs all tests
+  runs-on: ubuntu-latest
 
-   - name: Installs libraries
-     run: npm install
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-   - name: Runs tests
-     run: npm run coverage
-deploy:
- name: deploys on evennode
- needs: test
- runs-on: ubuntu-latest
+    - name: Install node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '15'
 
- steps:
-   - name: Checkout code
-     uses: actions/checkout@v2
-     with:
-       fetch-depth: 0
+    - name: Installs libraries
+      run: npm install
 
-   - name: Install SSH Key
-     uses: shimataro/ssh-key-action@v2
-     with:
-       key: ${{ secrets.EVENNODE_DEPLOY_KEY }}
-       known_hosts: " "
+    - name: Runs tests
+      run: npm run coverage
+  deploy:
+  name: deploys on evennode
+  needs: test
+  runs-on: ubuntu-latest
 
-   - name: Add git.evennode.com to known_hosts
-     run: |
-       ssh-keyscan -H git.evennode.com > ~/.ssh/known_hosts
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
-   - name: deploy
-     run: |
-       git remote add evennode ${{ secrets.EVENNODE_REPO_URL }}
-       git config --global user.email "${{ secrets.EVENNODE_GIT_EMAIL }}"
-       git config --global user.name "${{ secrets.EVENNODE_GIT_NAME }}"
-       git push evennode main:master
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.EVENNODE_DEPLOY_KEY }}
+        known_hosts: " "
+
+    - name: Add git.evennode.com to known_hosts
+      run: |
+        ssh-keyscan -H git.evennode.com > ~/.ssh/known_hosts
+
+    - name: deploy
+      run: |
+        git remote add evennode ${{ secrets.EVENNODE_REPO_URL }}
+        git config --global user.email "${{ secrets.EVENNODE_GIT_EMAIL }}"
+        git config --global user.name "${{ secrets.EVENNODE_GIT_NAME }}"
+        git push evennode main:master
