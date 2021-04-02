@@ -4,7 +4,7 @@
   "description": "a restful api for logging",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node ./index.js",
     "coverage": "jest --coverage",
     "test": "jest"
   },
